@@ -172,6 +172,33 @@ public class SOM {
         }
         return smallestIndex;
     }
+    public boolean BMUisConnected(Vector input){
+        int firstBMU = 0;
+        int secondBMU = 0;
+        double first = Double.MAX_VALUE;
+        double second = first;
+        for(Map.Entry<Integer, Vector> v :vectors.entrySet()){
+            double tryNewDist = distance(input,v.getValue());
+            if(first > tryNewDist){
+                firstBMU = v.getKey();
+                first = tryNewDist;
+            }
+        }
+        for(Map.Entry<Integer, Vector> v :vectors.entrySet()){
+            if(v.getKey() == firstBMU){
+                continue;
+            }
+            double tryNewDist = distance(input,v.getValue());
+            if(second > tryNewDist){
+                secondBMU = v.getKey();
+                second = tryNewDist;
+            }
+        }
+        
+        return topologicalDistance(firstBMU,secondBMU,this.gridSize) == 1;
+        
+    }
+    
     public int topologicalDistance(int first,int second, int gridSize){
         if(first > second){
             int t = first;
@@ -258,7 +285,13 @@ public class SOM {
     }
     
     public double topologicalError(List<Vector> input){
-        return 0;
+        double sum = 0;
+        for(Vector v:input){
+            if(!BMUisConnected(v)){
+                sum += 1;
+            }
+        }
+        return sum/this.nodes;
     }
     
     
