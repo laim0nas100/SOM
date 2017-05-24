@@ -19,15 +19,16 @@ import java.util.Random;
  */
 public class SOM {
     public int iteration = 0;
-    public int dim;
-    public int nodes;
+    public int dim;     //dimension  
+    public int nodes;   //neuron amount
     public double decay = 1;
-    public double decayRate = 0.99;
+    public double decayRate = 0.99; //decay lowers by 1%
     public HashMap<Integer,Vector> vectors = new HashMap<>();
-    public boolean single = false;
-    public boolean trace = false;
+    public boolean single = false; //only modify winning node
+    public boolean trace = false; //print progress
     public int gridSize = -1;
     public static Random rnd = new Random();
+    
     public SOM(int dimension, int nodeCount){
         int potGridSize = (int)Math.floor(Math.sqrt(nodeCount));
         if(nodeCount == potGridSize*potGridSize){
@@ -40,6 +41,7 @@ public class SOM {
         } 
     }
     
+    // find neighbours in grid formation 4-connectivity
     public int resolve(int index,int type, int gridSize){
         int result = -1;
         switch(type){
@@ -59,10 +61,10 @@ public class SOM {
         if(result < 0 || result >= this.nodes){
             return -1;
         }
-        return result;
-        
+        return result;  
     }    
     
+    //euclidean distance
     public double distance(Vector input, Vector node){
         double sum = 0;
         for(int i = 0; i < input.size(); i++){
@@ -71,22 +73,26 @@ public class SOM {
         return Math.sqrt(sum);
     }
     
-    
+    //use all inputs
     public void trainWithAll(List<Vector> input){
         for(Vector v:input){
             train(v);
         }
     }
     
+    //use 1 random input
     public void trainPick1(List<Vector> input){
         int nextInt = rnd.nextInt(input.size());
         train(input.get(nextInt));
     }
+    
     public void debug(String s){
         if(trace){
             System.out.println(s);
         }
     }
+    
+    //"bread and butter" train SOM with selected Vector
     public void train(Vector input){
         decay *= decayRate;
         iteration++;
@@ -136,11 +142,10 @@ public class SOM {
                 t += "\n"+v.toString();
             }
         }
-        
         debug(t);  
     }
     
-    
+    //Get cluster on specified input
     public int test(Vector input){
         int smallestIndex = 0;
         double minValue = Double.MAX_VALUE;
@@ -153,6 +158,8 @@ public class SOM {
         }
         return smallestIndex;
     }
+    
+    //find 2 best matching units and test if they are connected
     public boolean BMUisConnected(Vector input){
         int firstBMU = -1;
         int secondBMU = -1;
@@ -193,10 +200,10 @@ public class SOM {
             first++;
             x++;
         }
-        return x + y;
-        
-        
+        return x + y;  
     }
+    
+    // get neighbours of selected index and propagate recursively set ammount of iteration
     public void recursiveResolve(HashSet<Integer> set,int index, int iteration){
         if(iteration <= 0){
             return;
@@ -215,8 +222,9 @@ public class SOM {
             recursiveResolve(set,i,iteration - 1);
         }
     }
+    
+    // unly used if no grid structure has been found
     public ArrayList<Vector> resolveNeighbours(int index){
-        // unly used if no grid structure has been found
         ArrayList<Vector> list = new ArrayList<>();
         int size = this.vectors.size();
         int last = size - 1;
@@ -236,6 +244,8 @@ public class SOM {
         }
         return list;
     }
+    
+    //update all weights relative to selected input
     public void updateWeights(Vector node,Vector input,double distanceMultiplier){
         for(int j = 0; j < this.dim; j++){
             Double w = node.get(j);
@@ -264,7 +274,7 @@ public class SOM {
     }
     
     
-    
+    // use for making SOM grid
     public static class ClassHitCounter{
         public int classCount;
         public HashMap<Integer,HashMap<Integer,Integer>> hitCount = new HashMap<>();
