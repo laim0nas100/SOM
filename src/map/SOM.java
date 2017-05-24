@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package my;
+package map;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,23 +18,15 @@ import java.util.Random;
  * @author Lemmin
  */
 public class SOM {
-    public class PosDetails{
-        public int top = -1;
-        public int bot = -1;
-        public int left = -1;
-        public int right = -1;
-    }
-    public ArrayList<PosDetails> pos = new ArrayList<>();
-    public double[][] neuronXY;
     public int iteration = 0;
     public int dim;
     public int nodes;
     public double decay = 1;
-    public double decayRate = 0.98;
+    public double decayRate = 0.99;
     public HashMap<Integer,Vector> vectors = new HashMap<>();
     public boolean single = false;
     public boolean trace = false;
-    private int gridSize = -1;
+    public int gridSize = -1;
     public static Random rnd = new Random();
     public SOM(int dimension, int nodeCount){
         int potGridSize = (int)Math.floor(Math.sqrt(nodeCount));
@@ -42,18 +35,9 @@ public class SOM {
         }
         this.nodes = nodeCount;
         this.dim = dimension;
-        this.neuronXY = new double[nodeCount][2];
-        double nodeSpace = 0;
         for(int i = 0; i < nodeCount; i++){
             vectors.put(i,Vector.getRandom(dimension));
-            
-            double x = 0.5 + 0.5 * Math.cos(nodeSpace);
-            double y = 0.5 + 0.5 * Math.sin(nodeSpace);
-            nodeSpace += Math.PI * 2.0 / (double)nodeCount;
-            neuronXY[i][0] = x;
-            neuronXY[i][1] = y;
-        }
-        
+        } 
     }
     
     public int resolve(int index,int type, int gridSize){
@@ -86,14 +70,12 @@ public class SOM {
         }
         return Math.sqrt(sum);
     }
-
     
     
     public void trainWithAll(List<Vector> input){
         for(Vector v:input){
             train(v);
         }
-        
     }
     
     public void trainPick1(List<Vector> input){
@@ -110,7 +92,7 @@ public class SOM {
         iteration++;
         double smallestDistance = Double.MAX_VALUE;
         int smallestIndex = 0;
-        
+        //find winner
         for(int j = 0; j < this.nodes; j++){
             double tryNewDist = this.distance(input, this.vectors.get(j));
             if(smallestDistance > tryNewDist){
@@ -139,24 +121,23 @@ public class SOM {
                 t += "\n"+smallestIndex + " Update set"+set.toString();
                 
                 for(Integer i:set){
-                    int dist = this.topologicalDistance(i, smallestIndex, this.gridSize);
-                    
+                    int dist = this.manhattanDistance(i, smallestIndex, this.gridSize);
                     if(dist > 0 && dist < this.gridSize){
-                        double distMult = 1 / (double)dist;
+                        double distMult = 1;
+                        distMult = distMult / (double)dist;
                         t+="\n"+i+" Top dist:"+dist +" Dist multi:"+distMult;
                         updateWeights(vectors.get(i),input,distMult);
-                    }
-                    
+                    }   
                 }
+            } 
+        }
+        if(this.trace){
+            for(Vector v:this.vectors.values()){
+                t += "\n"+v.toString();
             }
-            
         }
-        for(Vector v:this.vectors.values()){
-            t += "\n"+v.toString();
-        }
-        debug(t);  
         
-  
+        debug(t);  
     }
     
     
@@ -173,42 +154,39 @@ public class SOM {
         return smallestIndex;
     }
     public boolean BMUisConnected(Vector input){
-        int firstBMU = 0;
-        int secondBMU = 0;
+        int firstBMU = -1;
+        int secondBMU = -1;
         double first = Double.MAX_VALUE;
         double second = first;
         for(Map.Entry<Integer, Vector> v :vectors.entrySet()){
             double tryNewDist = distance(input,v.getValue());
+            if((secondBMU >= 0) && (second > tryNewDist)){
+                second = tryNewDist;
+                secondBMU = v.getKey();
+            }
             if(first > tryNewDist){
+                secondBMU = firstBMU;
                 firstBMU = v.getKey();
+                second = first;
                 first = tryNewDist;
             }
         }
-        for(Map.Entry<Integer, Vector> v :vectors.entrySet()){
-            if(v.getKey() == firstBMU){
-                continue;
-            }
-            double tryNewDist = distance(input,v.getValue());
-            if(second > tryNewDist){
-                secondBMU = v.getKey();
-                second = tryNewDist;
-            }
-        }
         
-        return topologicalDistance(firstBMU,secondBMU,this.gridSize) == 1;
+        int topDist = manhattanDistance(firstBMU,secondBMU,this.gridSize);
+        return topDist <= 1;
         
     }
     
-    public int topologicalDistance(int first,int second, int gridSize){
-        if(first > second){
+    public int manhattanDistance(int first,int second, int gridSize){
+        if(first > second){//swap, must be first <= second
             int t = first;
             first = second;
             second = t;
         }
         int y = 0;
         int x = 0;
-        while(first < second){
-            first += gridSize;
+        while(first + gridSize <= second){
+            first = first + gridSize;
             y++;
         }
         while(first < second){
@@ -223,7 +201,7 @@ public class SOM {
         if(iteration <= 0){
             return;
         }
-        ArrayList<Integer> thisIteration = new ArrayList<>();
+        ArrayDeque<Integer> thisIteration = new ArrayDeque<>();
         for(int i = 0; i < 4; i++){
             int n = resolve(index,i,this.gridSize);
             if(n >= 0){
@@ -238,21 +216,12 @@ public class SOM {
         }
     }
     public ArrayList<Vector> resolveNeighbours(int index){
-        
+        // unly used if no grid structure has been found
         ArrayList<Vector> list = new ArrayList<>();
         int size = this.vectors.size();
         int last = size - 1;
         if(size < 2){
             return list;
-        }
-        if(gridSize > 0){
-            for(int i = 0; i < 4; i++){
-            int n = resolve(index,i,this.gridSize);
-            if(n >= 0){
-                list.add(this.vectors.get(n));
-            }
-            
-        }
         }else{
             if(index == 0){
                 list.add(this.vectors.get(index + 1));
@@ -281,7 +250,7 @@ public class SOM {
         for(Vector v:input){
             sum += distance(this.vectors.get(this.test(v)),v);
         }
-        return sum / (double) this.nodes;
+        return sum / (double) input.size();
     }
     
     public double topologicalError(List<Vector> input){
@@ -291,8 +260,44 @@ public class SOM {
                 sum += 1;
             }
         }
-        return sum/this.nodes;
+        return sum / (double)input.size();
     }
     
+    
+    
+    public static class ClassHitCounter{
+        public int classCount;
+        public HashMap<Integer,HashMap<Integer,Integer>> hitCount = new HashMap<>();
+        public ClassHitCounter(int classCount){
+            this.classCount = classCount;
+        }
+        public void hit(int node, int _class){
+            if(!hitCount.containsKey(node)){
+                hitCount.put(node, new HashMap<Integer,Integer>());
+            }
+            HashMap<Integer, Integer> classes = hitCount.get(node);
+            if(!classes.containsKey(_class)){
+                classes.put(_class, 0);
+            }
+            Integer res = classes.get(_class) + 1;
+            classes.put(_class, res);
+        }
+        public Integer resolveClass(int node){
+            HashMap<Integer, Integer> get = hitCount.get(node);
+            if(get == null){
+                return null;
+            }else{
+                //find max hit count of selected node
+                int maxHits = 0;
+                int classID = -1;
+                for(Map.Entry<Integer, Integer> val:get.entrySet()){
+                    if(val.getValue() > maxHits){
+                        classID = val.getKey();
+                    }
+                }
+                return classID;
+            }
+        }
+    }
     
 }

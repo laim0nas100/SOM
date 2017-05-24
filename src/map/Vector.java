@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package my;
+package map;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -28,6 +28,7 @@ public class Vector {
         }
         return vectors;
     }
+    
     public static Vector getRandom(int desiredSize){
         Vector v = new Vector();
         for(int i = 0; i < desiredSize; i++){
@@ -35,6 +36,7 @@ public class Vector {
         }
         return v;
     }
+    
     public static Vector setRandom(Vector v){
         for(int i = 0; i < v.size(); i++){
             v.weights.set(i, rnd.nextDouble());
@@ -48,6 +50,7 @@ public class Vector {
         }
         return v;
     }
+    
     public static Vector[] minmax(ArrayList<Vector> vectors){
         Vector min = vectors.get(0).clone();
         Vector max = min.clone();
@@ -62,16 +65,15 @@ public class Vector {
         data[0] = min;
         data[1] = max;
         return data;
-        
     }
-    
-    
+
     @Override
     public Vector clone(){
         Vector clone = new Vector();
         clone.weights.addAll(this.weights);
         return clone;
     }
+    
     public void normalize(Vector globalMin,Vector globalMax){
         double[] data = new double[globalMax.size()];
         for(int i = 0; i < data.length; i++){
@@ -79,6 +81,7 @@ public class Vector {
         }
         this.weights = Vector.asVector(data).weights;
     }
+    
     public void denormalize(Vector globalMin, Vector globalMax){
         double[] data = new double[globalMax.size()];
         for(int i = 0; i < data.length; i++){
@@ -92,6 +95,7 @@ public class Vector {
         n.normalize(globalMin, globalMax);
         return n;
     }
+    
     public Vector denormalized(Vector globalMin, Vector globalMax){
         Vector n = this.clone();
         n.denormalize(globalMin, globalMax);
@@ -102,6 +106,7 @@ public class Vector {
     public int size(){
         return weights.size();
     }
+    
     public Double get(int i){
         return weights.get(i);
     }
