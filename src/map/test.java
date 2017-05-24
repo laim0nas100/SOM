@@ -23,10 +23,10 @@ public class test {
                 v.normalize(globalMin, globalMax);
             }
             //must be quadratic number i.e. (4,9,16,25,...) for grid reprezentation
-            SOM s = new SOM(columnCount,100);
+            SOM s = new SOM(columnCount,10*10);
 //            s.trace = true;
 //            s.single = false;
-            while(s.iteration < 500 ){
+            while(s.iteration < 1000 ){
                 s.trainPick1(training);
             }
             if(s.gridSize<0){
@@ -36,7 +36,7 @@ public class test {
             System.out.println("Input ammount:"+training.size());
             System.out.println("Errors");
             System.out.printf("Quantization:%05f\n",s.quantizationError(training));
-            System.out.printf("Topological:%05f\n",s.topologicalError(training));
+            System.out.printf("Topological: %05f\n",s.topologicalError(training));
             
             //Clusterize table
             ClassHitCounter hit = new ClassHitCounter(3);
@@ -71,7 +71,7 @@ public class test {
         }
     }
     
-    public static void newClusterCaseUse(){
+    public static void newClusterUseCase(){
         try{
             ArrayList<Vector> training = CSVparser.readFile(new File("irisTrain.arff"));
             ArrayList<Vector> evaluate = CSVparser.readFile(new File("irisEvaluate.arff"));
@@ -91,7 +91,7 @@ public class test {
             SOM s = new SOM(columnCount,100);
 //            s.trace = true;
 //            s.single = false;
-            while(s.iteration < 500 ){
+            while(s.iteration < 1000 ){
                 s.trainPick1(training);
             }
             if(s.gridSize<0){
@@ -102,7 +102,7 @@ public class test {
             System.out.println("Input ammount:"+training.size());
             System.out.println("Errors");
             System.out.printf("Quantization:%05f\n",s.quantizationError(training));
-            System.out.printf("Topological:%05f\n",s.topologicalError(training));
+            System.out.printf("Topological: %05f\n",s.topologicalError(training));
             
             //Clusterize table
             ClassHitCounter hit = new ClassHitCounter(3);
@@ -115,7 +115,7 @@ public class test {
                 if(i<class1){
                     hit.hit(nodeID, 1);
                 }else if(i<class2){
-                    hit.hit(nodeID,2);
+                    hit.hit(nodeID, 2);
                 }else{
                     hit.hit(nodeID, 3);
                 }   
@@ -137,7 +137,7 @@ public class test {
         }
     }
     
-    public static void classifyCaseUse(){
+    public static void classifyUseCase(){
         try {
             
             ArrayList<Vector> training = CSVparser.readFile(new File("irisTrain.arff"));
@@ -156,11 +156,13 @@ public class test {
             }
             SOM s = new SOM(columnCount,3);
 //            s.trace = true;
-//            s.single = false;
+            s.single = true;
             while(s.iteration < 1000 ){
                 s.trainPick1(training);
             }
-            System.out.println("Class only reprezents different cluster");
+            System.out.println("Class only represents different cluster");
+            System.out.println("In a perfect world there should be 10 consecutive data vectors of each class");
+            System.out.println("But this is not a perfect world\n");
             for(Vector testSet:evaluate){
                 int test = s.test(testSet.normalized(globalMin, globalMax));
                 System.out.println("Class: " + test+" values:"+testSet.toString());// + ". Class: " + s.vectors.get(test).toString());
@@ -172,10 +174,15 @@ public class test {
     }
     
     public static void main(String[] args){
-        //pick one
+        //use cases
+        String br = "--------------------------------------\n";
+
+        System.out.println(br+"Clusterize input data\n"+br);
         clusterizeUseCase();
-//        newClusterCaseUse();
-//        classifyCaseUse();
+        System.out.println("\n"+br+"Clusterize new data after training\n"+br);
+        newClusterUseCase();
+        System.out.println("\n"+br+"Classify new data after training\n"+br);
+        classifyUseCase();
         
     }
 }

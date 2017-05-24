@@ -42,7 +42,7 @@ public class SOM {
     }
     
     // find neighbours in grid formation 4-connectivity
-    public int resolve(int index,int type, int gridSize){
+    public int resolve(int index, int type, int gridSize){
         int result = -1;
         switch(type){
             case 0://top
@@ -145,7 +145,7 @@ public class SOM {
         debug(t);  
     }
     
-    //Get cluster on specified input
+    //Get cluster id on specified input
     public int test(Vector input){
         int smallestIndex = 0;
         double minValue = Double.MAX_VALUE;
@@ -185,7 +185,7 @@ public class SOM {
     }
     
     public int manhattanDistance(int first,int second, int gridSize){
-        if(first > second){//swap, must be first <= second
+        if(first > second){//ensure first <= second
             int t = first;
             first = second;
             second = t;
@@ -309,5 +309,4 @@ public class SOM {
             }
         }
     }
-    
 }

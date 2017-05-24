@@ -43,6 +43,7 @@ public class Vector {
         }
         return v;
     }
+    
     public static Vector asVector(double[] data){
         Vector v = new Vector();
         for(int i = 0; i < data.length; i++){
@@ -74,7 +75,7 @@ public class Vector {
         return clone;
     }
     
-    public void normalize(Vector globalMin,Vector globalMax){
+    public void normalize(Vector globalMin, Vector globalMax){
         double[] data = new double[globalMax.size()];
         for(int i = 0; i < data.length; i++){
             data[i] = (this.get(i) - globalMin.get(i)) / (globalMax.get(i) - globalMin.get(i));
@@ -90,7 +91,7 @@ public class Vector {
         this.weights = Vector.asVector(data).weights;
     }
     
-    public Vector normalized(Vector globalMin,Vector globalMax){
+    public Vector normalized(Vector globalMin, Vector globalMax){
         Vector n = this.clone();
         n.normalize(globalMin, globalMax);
         return n;
@@ -101,8 +102,7 @@ public class Vector {
         n.denormalize(globalMin, globalMax);
         return n;
     }
-    
-    
+     
     public int size(){
         return weights.size();
     }
