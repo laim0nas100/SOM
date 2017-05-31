@@ -29,6 +29,14 @@ public class Vector {
         return vectors;
     }
     
+    public static Vector getWithValue(int desiredSize, Double val){
+        Vector v = new Vector();
+        for(int i = 0; i < desiredSize; i++){
+            v.weights.add(val);
+        }
+        return v;
+    }
+    
     public static Vector getRandom(int desiredSize){
         Vector v = new Vector();
         for(int i = 0; i < desiredSize; i++){

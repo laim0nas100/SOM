@@ -26,7 +26,7 @@ public class test {
             SOM s = new SOM(columnCount,10*10);
 //            s.trace = true;
 //            s.single = false;
-            while(s.iteration < 1000 ){
+            while(s.iteration < 500 ){
                 s.trainPick1(training);
             }
             if(s.gridSize<0){
@@ -56,15 +56,20 @@ public class test {
             }
             //print cluster table
             for(int i=0; i<s.nodes; i+= s.gridSize){
+                String line = "";
+                String nullValue = " ";
                 for(int j=0; j<s.gridSize; j++){             
                     Integer resolved = hit.resolveClass(i+j);
+//                    line+=",";
+                    line+=" ";
                     if(resolved == null){
-                        System.out.print("  ");
+                        line+=nullValue;
                     }else{
-                        System.out.print(" "+resolved);
+                        line+=resolved;
                     }
+                    
                 }
-                System.out.println();
+                System.out.println(line.substring(1));
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -122,15 +127,20 @@ public class test {
             }
             //print table
             for(int i=0; i<s.nodes; i+= s.gridSize){
+                String line = "";
+                String nullValue = " ";
                 for(int j=0; j<s.gridSize; j++){             
                     Integer resolved = hit.resolveClass(i+j);
+//                    line+=",";
+                    line+=" ";
                     if(resolved == null){
-                        System.out.print("  ");
+                        line+=nullValue;
                     }else{
-                        System.out.print(" "+resolved);
+                        line+=resolved;
                     }
+                    
                 }
-                System.out.println();
+                System.out.println(line.substring(1));
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -166,6 +176,7 @@ public class test {
             for(Vector testSet:evaluate){
                 int test = s.test(testSet.normalized(globalMin, globalMax));
                 System.out.println("Class: " + test+" values:"+testSet.toString());// + ". Class: " + s.vectors.get(test).toString());
+//                System.out.println(test);
             }
             
         } catch (Exception ex) {

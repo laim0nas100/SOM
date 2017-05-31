@@ -38,6 +38,7 @@ public class SOM {
         this.dim = dimension;
         for(int i = 0; i < nodeCount; i++){
             vectors.put(i,Vector.getRandom(dimension));
+//            vectors.put(i, Vector.getWithValue(dimension, 0.5d));
         } 
     }
     
